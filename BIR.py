@@ -1,4 +1,4 @@
-#This repository includes the following functions:
+#This file includes the following functions:
 #parseFastaFile(filename)
 #countMonomers(seq)
 #greatestContent(sequences, monomers)
@@ -15,6 +15,7 @@
 #rna2Protein(rna)
 
 #---------------------------------------------------
+#string -> string
 #This function takes a DNA sequence and returns the reverse complement.
 #The reverse complement is made by first taking the reverse, then
 #using the complementary base for each ('G' for 'C', 'A' for 'T').
@@ -36,8 +37,9 @@ def reverseComplement(dna):
 #---------------------------------------------------
 
 #---------------------------------------------------
+#string, string -> array
 #This function takes a substring and a string, and returns an array
-#of all positions of the substring in the string using 0-based count.
+#of all positions of the substring in the string using 0-based numbering.
 #If the substring is bigger than the string or no positions are found,
 #it returns an empty array.
 def indexSubstring(substring, string):
@@ -53,6 +55,7 @@ def indexSubstring(substring, string):
 
 
 #---------------------------------------------------
+#string, string -> int
 #This function takes two strings and returns the Hamming distance.
 #The Hamming distance is defined as the number of mismatches
 #between sequences.
@@ -60,7 +63,7 @@ def hammingDistance(seq1, seq2):
     dH = 0
     
     if not(len(seq1) == len(seq2)):
-        print 'lengths not equal, errors may result    --hammingDist--'
+        print 'sequence lengths not equal, errors may result    --hammingDist--'
     for pos in range(len(seq1)):
         if not(seq1[pos] == seq2[pos]):
             dH += 1
@@ -70,12 +73,13 @@ def hammingDistance(seq1, seq2):
 
 
 #---------------------------------------------------
+#directory -> dictionary
 #This function takes a file (in FASTA form) and returns a dictionary
-#of tags and their corresponding sequences. filename is the directory.
-def parseFastaFile(filename):
+#{FASTA tag: sequenceString, ..}. filePath is the full path.
+def parseFastaFile(filePath):
     dictionary = {}
         
-    with open(filename, 'r') as r:
+    with open(filePath, 'r') as r:
         for line in r:
             if line[0] == '>':
                 tag = line[1:-1]
@@ -89,6 +93,7 @@ def parseFastaFile(filename):
 
 
 #---------------------------------------------------
+#array, array -> string
 #This function takes a list of sequences and a list of monomers, and
 #returns the sequence with the greatest %content of those monomers.
 def greatestContent(sequences, monomers):
@@ -97,7 +102,7 @@ def greatestContent(sequences, monomers):
     
     for seq in sequences:
         total = 0
-        occurences = countDnaBases(seq)
+        occurences = countMonomers(seq)
         for monomer in monomers:
             total += occurences[monomer]
         contentList.append(float(total)/len(seq))
@@ -112,9 +117,10 @@ def greatestContent(sequences, monomers):
 
 
 #---------------------------------------------------
+#string -> dictionary
 #This function takes a sequence and returns a dictionary of the number
 #of occurences of each monomer. The dictionary uses each monomer as a key
-#and their occurences as the values.
+#and their number of occurences as the value.
 def countMonomers(seq):
     results = {}
     
@@ -129,7 +135,9 @@ def countMonomers(seq):
 
 
 #---------------------------------------------------
-#This function
+#array -> string
+#This function takes an array of sequences and returns the 'mode'
+#sequence, the sequence made up of the most frequent monomer at each position
 def consensusSequence(seqs):
     consensusSeq = buildConcensus(buildProfile(seqs))
     
@@ -139,10 +147,11 @@ def consensusSequence(seqs):
 
 
 #---------------------------------------------------
-#This function takes a list of sequences and returns the profile
+#array -> dictionary
+#This function takes a list of sequences and returns the profile.
 #The profile is a dictionary of each type of character in the sequences,
 #which each have value of an array. This array holds the number of occurences
-#of that character at each position in the sequences.
+#of that character at each corresponding position in the sequences.
 def buildProfile(seqs):
     profile = {}
     
@@ -162,9 +171,12 @@ def buildProfile(seqs):
 
                 
 #---------------------------------------------------
-#fix me
+#dictionary -> string
+#this function takes a sequence array profile and returns the consesus sequence.
+#at each position of the concensus sequence is the monomer from the profile with 
+#the greatest value at the position
 def buildConsensus(profile):
-    consensus = ['']
+    consensus = []
     pos = 0
     
     winner = 0
@@ -188,6 +200,7 @@ def buildConsensus(profile):
 
 
 #---------------------------------------------------
+#string -> string
 #This function takes a DNA string and returns the corresponding RNA string.
 def dna2Rna(dna):
     rna = ''
@@ -201,6 +214,7 @@ def dna2Rna(dna):
 
 
 #---------------------------------------------------
+#string -> int
 #This function takes a mRNA sequence and returns the position of the first
 #start codon ('AUG'). The position is where the start codon starts. If no start
 #is found, None is returned.
@@ -210,15 +224,16 @@ def indexStartCodon(mRna):
             start = pos
             return start
         
-    print "no start codon found   --posStartCodon--"
+    print "no start codon found   --indexStartCodon--"
     return None
 #---------------------------------------------------
 
 
 #---------------------------------------------------
-#This function takes a mRNA sequence and returns the position of the first
-#stop codon ('UAA', 'UAG', or 'UGA') that is in the initial reading frame.
-#If no stop is found, None is returned.
+#string -> int
+#This function takes a mRNA sequence and returns the start position of the first
+#stop codon ('UAA', 'UAG', or 'UGA') that is **in the initial reading frame**.
+#If no stop is found, None is returned. Uses 0-based numbering
 def indexStopCodon(mRna):
 
     for codonPos in range(len(mRna)//3):
@@ -229,24 +244,26 @@ def indexStopCodon(mRna):
                     return end
             if mRna[codonPos*3+1] == 'G':
                 if mRna[codonPos*3+2] == 'A':
-                    end = codonPos*3
+                    end = codonPos*3 + 3
                     return end
-                
+    
+    print 'no stop codon found    --indexStopCodon--'            
     return None
 #---------------------------------------------------
 
 
 #---------------------------------------------------
+#string -> string
 #This function takes an mRNA sequence and returns the slice of the
 #sequence starting at the first found 'AUG', and ending at the next
-#found 'UAA', 'UAG', 'UGA' or end. The function returns None if there
-#is no start.
+#found 'UAA', 'UAG', 'UGA' or end. The function returns an empty string
+#if there is no start.
 def rnaCodingSeq(mRna):	
     start = indexStartCodon(mRna)
     end = indexStopCodon(mRna[start:])+4
     if start == None:
         print "no start codon was found   --rnaCodingSeq--"
-        return None
+        return ''
     if end == None:
         end = len(mRna)
         print "no stop codon was found    --rnaCodingSeq--"
@@ -256,6 +273,7 @@ def rnaCodingSeq(mRna):
 
 
 #---------------------------------------------------
+#string -> array
 #This function takes a RNA sequence and returns a list of codons. Codons are
 #three character strings. If the final codon is incomplete, it will not be
 #included.
@@ -276,10 +294,12 @@ def rna2Codons(rna):
 
     
 #---------------------------------------------------
+#string -> string
 #This function takes a codon string and returns the single letter code for the
-#corresponding amino acid. Stop codons return 'stop'.
+#corresponding amino acid. Stop codons return 'STOP'.
 def codon2Aa(codon):
-    dictionary = {'UUU' : 'F',
+    dictionary = {
+            'UUU' : 'F',
             'UUC' : 'F',
             'UUA' : 'L',
             'UUG' : 'L',
@@ -289,11 +309,11 @@ def codon2Aa(codon):
             'UCG' : 'S',
             'UAU' : 'Y',
             'UAC' : 'Y',
-            'UAA' : 'stop',
-            'UAG' : 'stop',
+            'UAA' : 'STOP',
+            'UAG' : 'STOP',
             'UGU' : 'C',
             'UGC' : 'C',
-            'UGA' : 'stop',
+            'UGA' : 'STOP',
             'UGG' : 'W',
 
             'CUU' : 'C',
@@ -345,7 +365,8 @@ def codon2Aa(codon):
             'GGU' : 'G',
             'GGC' : 'G',
             'GGA' : 'G',
-            'GGG' : 'G'}
+            'GGG' : 'G'
+            }
     aminoAcid = dictionary[codon]
     
     return aminoAcid
@@ -353,6 +374,7 @@ def codon2Aa(codon):
 
 
 #-----------------------------------------------------
+#string -> string
 #This function takes a RNA sequence and returns the corresponding protein
 #sequence. The protein ends at the first stop codon or end of the RNA.
 def rna2Protein(rna):
@@ -360,11 +382,12 @@ def rna2Protein(rna):
 
     codons = rna2Codons(rna)
     for codon in codons:
-        if codon2Aa(codon) == 'stop':
+        if codon2Aa(codon) == 'STOP':
             return protein
         else:
             protein += codon2Aa(codon)
-            
+    
+    print "no stop codon was found     --rna2Protein--"        
     return protein
 #------------------------------------------------------
 ##------------------------------------------------------------------------------------
