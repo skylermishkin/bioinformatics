@@ -1,2 +1,2 @@
 # bioinformatics
-version control for some self made tools/experiments
+I'll probably make this nicer and more package like later, then I'll also do a more proper readme.
