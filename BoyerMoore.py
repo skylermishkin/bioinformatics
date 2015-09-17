@@ -91,14 +91,3 @@ def boyer_moore(p, p_bm, t):
             shift = max(shift, skip_gs)
         i += shift
     return occurrences
-    
-def getFastaSeq(filedir):
-    with open(filedir, 'r') as f:
-        for line in f:
-            if line[0] == '>':
-                seq = ''
-            else:
-                seq += line.rstrip('\n')
-                
-    return seq
-dir = 'D:\Documents\Bioinformatics\GRHL3\DNASeq.fa'
